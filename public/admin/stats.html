@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thống kê - Admin WebQR</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-logo"><span class="logo-icon">🍜</span>
+            <h1>WebQR Admin</h1>
+        </div>
+        <div class="sidebar-nav">
+            <a href="/admin/dashboard.html" class="nav-item"><span class="icon">📊</span> Dashboard</a>
+            <a href="/admin/menu.html" class="nav-item"><span class="icon">📋</span> Quản lý Menu</a>
+            <a href="/admin/tables.html" class="nav-item"><span class="icon">🪑</span> Quản lý Bàn</a>
+            <a href="/admin/stats.html" class="nav-item active"><span class="icon">📈</span> Thống kê</a>
+            <a href="/admin/qr-print.html" class="nav-item"><span class="icon">📱</span> In QR Code</a>
+        </div>
+        <div class="sidebar-footer"><a class="nav-item" onclick="logout()"><span class="icon">🚪</span> Đăng xuất</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h2>📈 Thống kê doanh thu</h2>
+            <div class="top-bar-actions">
+                <select class="form-select" id="chartDays" onchange="loadStats()" style="width:auto">
+                    <option value="7">7 ngày</option>
+                    <option value="14">14 ngày</option>
+                    <option value="30">30 ngày</option>
+                </select>
+            </div>
+        </div>
+        <div class="page-content">
+            <div class="stats-grid" id="statsCards"></div>
+            <div class="chart-container">
+                <div class="chart-title">📊 Doanh thu theo ngày</div>
+                <div class="bar-chart" id="revenueChart"></div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">🏆 Top món bán chạy</div>
+                <div id="topProducts"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/shared/api.js"></script>
+    <script src="/js/admin/stats.js"></script>
+</body>
+
+</html>

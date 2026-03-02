@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Admin WebQR</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <span class="logo-icon">🍜</span>
+            <h1>WebQR Admin</h1>
+        </div>
+        <div class="sidebar-nav">
+            <a href="/admin/dashboard.html" class="nav-item active"><span class="icon">📊</span> Dashboard</a>
+            <a href="/admin/menu.html" class="nav-item"><span class="icon">📋</span> Quản lý Menu</a>
+            <a href="/admin/tables.html" class="nav-item"><span class="icon">🪑</span> Quản lý Bàn</a>
+            <a href="/admin/stats.html" class="nav-item"><span class="icon">📈</span> Thống kê</a>
+            <a href="/admin/qr-print.html" class="nav-item"><span class="icon">📱</span> In QR Code</a>
+        </div>
+        <div class="sidebar-footer">
+            <a class="nav-item" onclick="logout()"><span class="icon">🚪</span> Đăng xuất</a>
+        </div>
+    </nav>
+
+    <!-- Main -->
+    <div class="main-content">
+        <div class="top-bar">
+            <h2>📊 Dashboard Đơn Hàng</h2>
+            <div class="top-bar-actions">
+                <span id="soundToggle" class="btn-admin btn-admin-secondary" onclick="toggleSound()"
+                    style="cursor:pointer">🔔 Âm thanh: BẬT</span>
+            </div>
+        </div>
+
+        <div class="page-content">
+            <!-- Stats -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon orange">📦</div>
+                    <div class="stat-value" id="statOrders">0</div>
+                    <div class="stat-label">Đơn hôm nay</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">💰</div>
+                    <div class="stat-value" id="statRevenue">0đ</div>
+                    <div class="stat-label">Doanh thu hôm nay</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue">🪑</div>
+                    <div class="stat-value" id="statTables">0/30</div>
+                    <div class="stat-label">Bàn đang phục vụ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon yellow">⏳</div>
+                    <div class="stat-value" id="statPending">0</div>
+                    <div class="stat-label">Đơn chờ xử lý</div>
+                </div>
+            </div>
+
+            <!-- Kanban -->
+            <div class="kanban-board" id="kanbanBoard">
+                <div class="kanban-column" data-status="new">
+                    <div class="kanban-header">
+                        <h3>📩 Đơn mới</h3>
+                        <span class="kanban-count" id="countNew">0</span>
+                    </div>
+                    <div class="kanban-cards" id="cardsNew"></div>
+                </div>
+                <div class="kanban-column" data-status="preparing">
+                    <div class="kanban-header">
+                        <h3>👨‍🍳 Đang làm</h3>
+                        <span class="kanban-count" id="countPreparing">0</span>
+                    </div>
+                    <div class="kanban-cards" id="cardsPreparing"></div>
+                </div>
+                <div class="kanban-column" data-status="ready">
+                    <div class="kanban-header">
+                        <h3>✅ Sẵn sàng</h3>
+                        <span class="kanban-count" id="countReady">0</span>
+                    </div>
+                    <div class="kanban-cards" id="cardsReady"></div>
+                </div>
+                <div class="kanban-column" data-status="completed">
+                    <div class="kanban-header">
+                        <h3>🎉 Hoàn thành</h3>
+                        <span class="kanban-count" id="countCompleted">0</span>
+                    </div>
+                    <div class="kanban-cards" id="cardsCompleted"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio -->
+    <audio id="notifSound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACA"
+            type="audio/wav">
+    </audio>
+
+    <script src="/js/shared/api.js"></script>
+    <script src="/js/admin/dashboard.js"></script>
+</body>
+
+</html>

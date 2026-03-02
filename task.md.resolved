@@ -1,0 +1,41 @@
+# Web QR Ordering System - Quán Cafe & Ăn Vặt
+
+## Phase 1: Planning
+- [/] Tạo implementation plan
+- [ ] User review & approval
+
+## Phase 2: Backend Setup
+- [ ] Khởi tạo project Node.js + Express
+- [ ] Thiết kế database schema (SQLite/MySQL)
+- [ ] API: CRUD danh mục & sản phẩm
+- [ ] API: Quản lý đơn hàng
+- [ ] API: Quản lý bàn
+- [ ] API: Thống kê doanh thu
+- [ ] Tích hợp VietQR
+- [ ] Tích hợp Telegram Bot
+- [ ] WebSocket cho realtime
+
+## Phase 3: Frontend - Customer (Mobile-first)
+- [ ] Trang menu (quét QR → xem menu theo bàn)
+- [ ] Giỏ hàng + ghi chú + size/topping
+- [ ] Trang thanh toán (VietQR + tại quầy)
+- [ ] Xem trạng thái đơn hàng realtime
+- [ ] Gọi thêm món
+
+## Phase 4: Frontend - Admin Dashboard
+- [ ] Đăng nhập admin
+- [ ] Quản lý menu (thêm/sửa/xóa)
+- [ ] Quản lý đơn hàng (Kanban board)
+- [ ] Quản lý bàn
+- [ ] Thống kê doanh thu
+- [ ] Âm thanh thông báo
+
+## Phase 5: QR Code Generation
+- [ ] Tạo QR code cho 30 bàn
+- [ ] Trang in QR codes
+
+## Phase 6: Verification
+- [ ] Test luồng đặt hàng end-to-end
+- [ ] Test admin dashboard
+- [ ] Test responsive mobile
+- [ ] Tạo walkthrough

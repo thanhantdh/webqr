@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In QR Code - Admin WebQR</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-logo"><span class="logo-icon">🍜</span>
+            <h1>WebQR Admin</h1>
+        </div>
+        <div class="sidebar-nav">
+            <a href="/admin/dashboard.html" class="nav-item"><span class="icon">📊</span> Dashboard</a>
+            <a href="/admin/menu.html" class="nav-item"><span class="icon">📋</span> Quản lý Menu</a>
+            <a href="/admin/tables.html" class="nav-item"><span class="icon">🪑</span> Quản lý Bàn</a>
+            <a href="/admin/stats.html" class="nav-item"><span class="icon">📈</span> Thống kê</a>
+            <a href="/admin/qr-print.html" class="nav-item active"><span class="icon">📱</span> In QR Code</a>
+        </div>
+        <div class="sidebar-footer"><a class="nav-item" onclick="logout()"><span class="icon">🚪</span> Đăng xuất</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h2>📱 Tạo & In QR Code cho bàn</h2>
+            <div class="top-bar-actions">
+                <input class="form-input" id="baseUrl" placeholder="URL gốc" style="width:300px" value="">
+                <button class="btn-admin btn-admin-primary" onclick="generateQRCodes()">🔄 Tạo QR</button>
+                <button class="btn-admin btn-admin-secondary" onclick="window.print()">🖨️ In</button>
+            </div>
+        </div>
+        <div class="page-content">
+            <div class="qr-grid" id="qrGrid">
+                <p style="text-align:center;padding:40px;color:var(--text-light);grid-column:1/-1">
+                    Đang tải danh sách bàn...
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/shared/api.js"></script>
+    <script>
+        if (!localStorage.getItem('admin_token')) window.location.href = '/admin/login.html';
+
+        // Auto-detect base URL
+        document.getElementById('baseUrl').value = window.location.origin;
+
+        async function generateQRCodes() {
+            const baseUrl = document.getElementById('baseUrl').value.replace(/\/$/, '');
+            const grid = document.getElementById('qrGrid');
+            grid.innerHTML = '<p style="text-align:center;padding:40px;color:var(--text-light);grid-column:1/-1">Đang tạo mã QR...</p>';
+
+            try {
+                // Load tables from database
+                const tables = await api.get('/api/tables');
+
+                if (tables.length === 0) {
+                    grid.innerHTML = '<p style="text-align:center;padding:40px;color:var(--text-light);grid-column:1/-1">Chưa có bàn nào. Hãy thêm bàn ở trang <a href="/admin/tables.html">Quản lý Bàn</a></p>';
+                    return;
+                }
+
+                grid.innerHTML = '';
+
+                for (const table of tables) {
+                    const url = `${baseUrl}/?table=${table.number}`;
+                    const div = document.createElement('div');
+                    div.className = 'qr-item';
+                    div.innerHTML = `
+                        <div style="width:180px;height:180px;display:flex;align-items:center;justify-content:center;color:var(--text-light)">Đang tạo...</div>
+                        <h4>Bàn ${table.number}</h4>
+                        <p>${url}</p>
+                    `;
+                    grid.appendChild(div);
+
+                    // Generate QR via server API
+                    try {
+                        const result = await api.get(`/api/qrcode?text=${encodeURIComponent(url)}`);
+                        div.querySelector('div').outerHTML = `<img src="${result.dataUrl}" alt="QR Bàn ${table.number}" style="width:180px;height:180px">`;
+                    } catch (err) {
+                        div.querySelector('div').innerHTML = '<span style="color:var(--danger)">Lỗi QR</span>';
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+                grid.innerHTML = '<p style="text-align:center;padding:40px;color:var(--danger);grid-column:1/-1">Lỗi tải danh sách bàn. Hãy kiểm tra server.</p>';
+            }
+        }
+
+        // Auto-generate on load
+        generateQRCodes();
+
+        function logout() {
+            localStorage.removeItem('admin_token');
+            window.location.href = '/admin/login.html';
+        }
+    </script>
+</body>
+
+</html>

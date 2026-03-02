@@ -1,0 +1,19 @@
+{
+    "name": "webqr-ordering",
+    "version": "1.0.0",
+    "description": "Web QR Food Ordering System - Quán Cafe & Ăn Vặt",
+    "main": "server/server.js",
+    "scripts": {
+        "start": "node server/server.js",
+        "dev": "node --watch server/server.js"
+    },
+    "dependencies": {
+        "sql.js": "^1.10.0",
+        "dotenv": "^16.4.0",
+        "express": "^4.18.0",
+        "multer": "^1.4.5-lts.1",
+        "node-fetch": "^2.7.0",
+        "qrcode": "^1.5.3",
+        "ws": "^8.16.0"
+    }
+}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Admin WebQR</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+</head>
+
+<body class="login-page">
+    <div class="login-card">
+        <div class="logo">🍜</div>
+        <h1>WebQR Admin</h1>
+        <p>Đăng nhập để quản lý quán</p>
+        <form id="loginForm">
+            <div class="form-group">
+                <input type="password" class="form-input" id="password" placeholder="Nhập mật khẩu..." autofocus
+                    required>
+            </div>
+            <button type="submit" class="btn-admin btn-admin-primary">🔓 Đăng nhập</button>
+            <div class="login-error" id="loginError">Mật khẩu không đúng</div>
+        </form>
+    </div>
+
+    <script>
+        // Check if already logged in
+        const token = localStorage.getItem('admin_token');
+        if (token) window.location.href = '/admin/dashboard.html';
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('loginError');
+            errorEl.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    localStorage.setItem('admin_token', data.token);
+                    window.location.href = '/admin/dashboard.html';
+                } else {
+                    errorEl.style.display = 'block';
+                    errorEl.textContent = data.error || 'Mật khẩu không đúng';
+                }
+            } catch (err) {
+                errorEl.style.display = 'block';
+                errorEl.textContent = 'Lỗi kết nối server';
+            }
+        });
+    </script>
+</body>
+
+</html>

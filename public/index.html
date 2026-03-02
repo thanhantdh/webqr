@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Menu đặt đồ ăn & thức uống tại bàn qua QR code">
+  <title>Menu - WebQR Ordering</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍜</text></svg>">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <h1>🍜 WebQR Menu</h1>
+      <div class="table-badge" id="tableBadge">
+        🪑 Bàn <span id="tableNumber">1</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Category Tabs -->
+  <nav class="category-tabs">
+    <div class="tabs-scroll" id="categoryTabs">
+      <button class="tab-btn active" data-category="all">Tất cả</button>
+    </div>
+  </nav>
+
+  <!-- Products -->
+  <main class="products-section" id="productsContainer">
+    <div class="loading"><div class="spinner"></div></div>
+  </main>
+
+  <!-- Floating Cart Button -->
+  <button class="floating-cart hidden" id="floatingCart" onclick="window.location.href='/cart.html?table='+getTableNumber()">
+    🛒 Giỏ hàng <span class="cart-count">0</span>
+    <span class="cart-total">0đ</span>
+  </button>
+
+  <!-- Product Detail Modal -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h2>Chi tiết món</h2>
+        <button class="modal-close" onclick="closeProductModal()">✕</button>
+      </div>
+      <div class="modal-body" id="productDetail">
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/shared/api.js"></script>
+  <script src="/js/menu.js"></script>
+</body>
+</html>

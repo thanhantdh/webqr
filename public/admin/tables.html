@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Bàn - Admin WebQR</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <style>
+        .table-qr {
+            margin: 10px auto 6px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .table-qr canvas {
+            border-radius: 8px;
+            border: 2px solid var(--border);
+        }
+
+        .table-url {
+            font-size: 0.65rem;
+            color: var(--text-light);
+            word-break: break-all;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .table-order-info {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: var(--bg);
+            padding: 6px 10px;
+            border-radius: 8px;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-sm {
+            padding: 5px 10px !important;
+            font-size: 0.75rem !important;
+        }
+
+        .add-table-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .add-table-bar .form-input {
+            width: 140px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-logo"><span class="logo-icon">🍜</span>
+            <h1>WebQR Admin</h1>
+        </div>
+        <div class="sidebar-nav">
+            <a href="/admin/dashboard.html" class="nav-item"><span class="icon">📊</span> Dashboard</a>
+            <a href="/admin/menu.html" class="nav-item"><span class="icon">📋</span> Quản lý Menu</a>
+            <a href="/admin/tables.html" class="nav-item active"><span class="icon">🪑</span> Quản lý Bàn</a>
+            <a href="/admin/stats.html" class="nav-item"><span class="icon">📈</span> Thống kê</a>
+            <a href="/admin/qr-print.html" class="nav-item"><span class="icon">📱</span> In QR Code</a>
+        </div>
+        <div class="sidebar-footer"><a class="nav-item" onclick="logout()"><span class="icon">🚪</span> Đăng xuất</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h2>🪑 Quản lý Bàn</h2>
+            <div class="top-bar-actions">
+                <span id="tableStats" style="color:var(--text-secondary);font-size:0.9rem"></span>
+            </div>
+        </div>
+        <div class="page-content">
+            <div class="add-table-bar">
+                <input class="form-input" id="newTableNumber" type="number" min="1" placeholder="Số bàn (tự động)">
+                <button class="btn-admin btn-admin-primary" onclick="addTable()">➕ Thêm bàn mới</button>
+            </div>
+            <div class="tables-grid" id="tablesGrid">
+                <div style="text-align:center;padding:40px;color:var(--text-light)">Đang tải...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/shared/api.js"></script>
+    <script src="/js/admin/table-manager.js"></script>
+</body>
+
+</html>

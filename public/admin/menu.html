@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Menu - Admin WebQR</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-logo"><span class="logo-icon">🍜</span>
+            <h1>WebQR Admin</h1>
+        </div>
+        <div class="sidebar-nav">
+            <a href="/admin/dashboard.html" class="nav-item"><span class="icon">📊</span> Dashboard</a>
+            <a href="/admin/menu.html" class="nav-item active"><span class="icon">📋</span> Quản lý Menu</a>
+            <a href="/admin/tables.html" class="nav-item"><span class="icon">🪑</span> Quản lý Bàn</a>
+            <a href="/admin/stats.html" class="nav-item"><span class="icon">📈</span> Thống kê</a>
+            <a href="/admin/qr-print.html" class="nav-item"><span class="icon">📱</span> In QR Code</a>
+        </div>
+        <div class="sidebar-footer"><a class="nav-item" onclick="logout()"><span class="icon">🚪</span> Đăng xuất</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h2>📋 Quản lý Menu</h2>
+            <div class="top-bar-actions">
+                <button class="btn-admin btn-admin-primary" onclick="openAddProduct()">+ Thêm món</button>
+            </div>
+        </div>
+        <div class="page-content">
+            <div class="menu-toolbar">
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <select class="form-select" id="filterCategory" onchange="loadProducts()" style="width:auto">
+                        <option value="">Tất cả danh mục</option>
+                    </select>
+                </div>
+                <span id="productCount" style="color:var(--text-secondary);font-size:0.9rem"></span>
+            </div>
+            <div id="menuContainer">
+                <div style="text-align:center;padding:40px;color:var(--text-light)">Đang tải...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="admin-modal-overlay" id="productModal">
+        <div class="admin-modal">
+            <h2 id="modalTitle">➕ Thêm món mới</h2>
+            <form id="productForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>Danh mục *</label>
+                    <select class="form-select" id="formCategory" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Tên món *</label>
+                    <input class="form-input" id="formName" required placeholder="VD: Trà Sữa Trân Châu">
+                </div>
+                <div class="form-group">
+                    <label>Mô tả</label>
+                    <input class="form-input" id="formDesc" placeholder="Mô tả ngắn gọn">
+                </div>
+                <div class="form-group">
+                    <label>Giá (VNĐ) *</label>
+                    <input class="form-input" id="formPrice" type="number" required min="0" step="1000"
+                        placeholder="35000">
+                </div>
+                <div class="form-group">
+                    <label>Hình ảnh URL</label>
+                    <input class="form-input" id="formImage" placeholder="/images/products/...">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-admin btn-admin-primary" style="flex:1">💾 Lưu</button>
+                    <button type="button" class="btn-admin btn-admin-secondary" onclick="closeModal()">Hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/shared/api.js"></script>
+    <script src="/js/admin/menu-manager.js"></script>
+</body>
+
+</html>

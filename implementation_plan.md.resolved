@@ -1,0 +1,197 @@
+# Web QR Ordering System - Quán Cafe & Ăn Vặt
+
+Xây dựng hệ thống đặt đồ ăn/uống qua QR code tại bàn cho quán cafe & ăn vặt với 30 bàn, 50+ món. Stack: **Node.js + Express + SQLite + Vanilla HTML/CSS/JS**.
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Thông tin cần cung cấp để tích hợp:**
+> - **VietQR**: Số tài khoản ngân hàng, tên ngân hàng (Bank ID), tên chủ tài khoản
+> - **Telegram**: Bot Token và Chat ID (nhóm nhân viên)
+> - Nếu chưa có, hệ thống sẽ dùng placeholder để bạn điền sau
+
+> [!WARNING]
+> **Database**: Sử dụng **SQLite** cho đơn giản, dễ deploy. Nếu muốn MySQL/PostgreSQL thì cho biết nhé.
+
+---
+
+## Cấu trúc thư mục
+
+```
+WebQR/
+├── server/
+│   ├── server.js              # Entry point Express
+│   ├── database.js            # SQLite setup + seed data
+│   ├── routes/
+│   │   ├── categories.js      # API danh mục
+│   │   ├── products.js        # API sản phẩm
+│   │   ├── orders.js          # API đơn hàng
+│   │   ├── tables.js          # API bàn
+│   │   └── stats.js           # API thống kê
+│   ├── services/
+│   │   ├── telegram.js        # Telegram Bot
+│   │   └── vietqr.js          # VietQR generator
+│   └── middleware/
+│       └── auth.js            # Admin auth (simple)
+├── public/
+│   ├── index.html             # Customer: Menu page
+│   ├── cart.html              # Customer: Giỏ hàng
+│   ├── checkout.html          # Customer: Thanh toán
+│   ├── order-status.html      # Customer: Trạng thái đơn
+│   ├── admin/
+│   │   ├── login.html         # Admin: Đăng nhập
+│   │   ├── dashboard.html     # Admin: Kanban đơn hàng
+│   │   ├── menu.html          # Admin: Quản lý menu
+│   │   ├── tables.html        # Admin: Quản lý bàn
+│   │   ├── stats.html         # Admin: Thống kê
+│   │   └── qr-print.html     # Admin: In QR cho bàn
+│   ├── css/
+│   │   ├── style.css          # Customer styles
+│   │   └── admin.css          # Admin styles
+│   ├── js/
+│   │   ├── menu.js            # Customer menu logic
+│   │   ├── cart.js            # Giỏ hàng logic
+│   │   ├── checkout.js        # Thanh toán logic
+│   │   ├── order-status.js    # Realtime order tracking
+│   │   ├── admin/
+│   │   │   ├── login.js
+│   │   │   ├── dashboard.js   # Kanban + notifications
+│   │   │   ├── menu-manager.js
+│   │   │   ├── table-manager.js
+│   │   │   ├── stats.js
+│   │   │   └── qr-generator.js
+│   │   └── shared/
+│   │       └── api.js         # API helper
+│   ├── sounds/
+│   │   └── notification.mp3   # Tiếng chuông
+│   └── images/                # Hình sản phẩm (AI generated)
+├── package.json
+└── .env                       # Config (DB, Telegram, VietQR)
+```
+
+---
+
+## Proposed Changes
+
+### Phase 1: Backend Core
+
+#### [NEW] [package.json](file:///c:/Users/Kiem%20PC/Desktop/WebQR/package.json)
+Dependencies: `express`, `better-sqlite3`, `ws` (WebSocket), `node-fetch`, `dotenv`, `multer` (upload ảnh), `qrcode`
+
+#### [NEW] [.env](file:///c:/Users/Kiem%20PC/Desktop/WebQR/.env)
+Config: PORT, ADMIN_PASSWORD, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, BANK_ID, BANK_ACCOUNT, BANK_NAME
+
+#### [NEW] [server.js](file:///c:/Users/Kiem%20PC/Desktop/WebQR/server/server.js)
+- Express server + static file serving
+- WebSocket server cho realtime updates
+- Route mounting
+
+#### [NEW] [database.js](file:///c:/Users/Kiem%20PC/Desktop/WebQR/server/database.js)
+
+**Database Schema:**
+
+| Table | Columns |
+|-------|---------|
+| `categories` | `id`, `name`, `icon`, `sort_order`, `created_at` |
+| `products` | `id`, `category_id`, `name`, `description`, `price`, `image`, `sizes` (JSON), `toppings` (JSON), `is_available`, `sort_order` |
+| `tables` | `id`, `number`, `status` (empty/occupied), `qr_code` |
+| `orders` | `id`, `table_number`, `status` (new/preparing/ready/completed/paid), `payment_method`, `payment_status`, `total_amount`, `note`, `created_at` |
+| `order_items` | `id`, `order_id`, `product_id`, `product_name`, `quantity`, `size`, `toppings` (JSON), `note`, `price`, `subtotal` |
+
+**Seed data**: 50+ món cafe & ăn vặt Việt Nam (trà sữa, cà phê, bánh tráng trộn, gà rán, khoai lắc...)
+
+---
+
+#### [NEW] Routes API
+
+| Route File | Endpoints |
+|-----------|-----------|
+| `categories.js` | `GET /api/categories`, `POST`, `PUT/:id`, `DELETE/:id` |
+| `products.js` | `GET /api/products`, `GET /api/products/:categoryId`, `POST`, `PUT/:id`, `DELETE/:id`, `POST/upload-image` |
+| `orders.js` | `GET /api/orders`, `POST /api/orders`, `PUT /api/orders/:id/status`, `GET /api/orders/table/:tableNumber`, `POST /api/orders/:id/add-items` |
+| `tables.js` | `GET /api/tables`, `PUT /api/tables/:id/status` |
+| `stats.js` | `GET /api/stats/today`, `GET /api/stats/range?from=&to=` |
+
+---
+
+#### [NEW] Services
+
+| File | Mô tả |
+|------|--------|
+| `telegram.js` | Gửi thông báo đơn mới qua Telegram Bot API |
+| `vietqr.js` | Tạo link VietQR động với số tiền + nội dung chuyển khoản |
+
+---
+
+### Phase 2: Customer Frontend (Mobile-first)
+
+#### [NEW] [index.html](file:///c:/Users/Kiem%20PC/Desktop/WebQR/public/index.html) - Menu Page
+- URL: `/?table=5` (từ QR code)
+- Hiển thị menu theo danh mục (tab ngang cuộn)
+- Card sản phẩm: ảnh, tên, giá, nút thêm
+- Floating cart button (giỏ hàng)
+- Animation micro-interactions
+
+#### [NEW] [cart.html](file:///c:/Users/Kiem%20PC/Desktop/WebQR/public/cart.html) - Giỏ hàng
+- Danh sách món đã chọn + tăng/giảm số lượng
+- Chọn size, topping cho từng món
+- Ghi chú (ít đường, không đá...)
+- Tổng tiền + nút đặt hàng
+
+#### [NEW] [checkout.html](file:///c:/Users/Kiem%20PC/Desktop/WebQR/public/checkout.html) - Thanh toán
+- Chọn: Thanh toán tại quầy hoặc VietQR
+- Hiện mã VietQR động (nếu chọn online)
+- Xác nhận đơn hàng
+
+#### [NEW] [order-status.html](file:///c:/Users/Kiem%20PC/Desktop/WebQR/public/order-status.html) - Theo dõi đơn
+- Trạng thái realtime qua WebSocket
+- Timeline: Đã nhận → Đang pha chế → Sẵn sàng → Hoàn thành
+- Nút "Gọi thêm món" → quay lại menu
+
+---
+
+### Phase 3: Admin Dashboard
+
+#### [NEW] Admin pages
+- **login.html**: Đăng nhập đơn giản (password only)
+- **dashboard.html**: Kanban 4 cột (Mới | Đang làm | Sẵn sàng | Hoàn thành), kéo-thả đơn, âm thanh chuông khi có đơn mới
+- **menu.html**: CRUD danh mục + sản phẩm, upload ảnh, quản lý size/topping
+- **tables.html**: Bản đồ 30 bàn, trạng thái màu (xanh=trống, đỏ=có khách)
+- **stats.html**: Biểu đồ doanh thu (ngày/tuần/tháng), top món bán chạy
+- **qr-print.html**: Tạo & in QR cho 30 bàn
+
+---
+
+### Phase 4: Design System (CSS)
+
+#### [NEW] [style.css](file:///c:/Users/Kiem%20PC/Desktop/WebQR/public/css/style.css)
+- **Tông ấm**: `--primary: #FF6B35`, `--secondary: #F7C948`, `--bg: #FFF8F0`
+- Google Fonts: Inter + Outfit
+- Mobile-first responsive
+- Glassmorphism cards, smooth transitions
+- Micro-animations (hover, add-to-cart bounce)
+
+#### [NEW] [admin.css](file:///c:/Users/Kiem%20PC/Desktop/WebQR/public/css/admin.css)
+- Sidebar navigation
+- Kanban board layout
+- Charts styling
+- Dark mode support
+
+---
+
+## Verification Plan
+
+### Automated Tests
+1. **Server khởi động**: `cd c:\Users\Kiem PC\Desktop\WebQR && npm start` — server chạy trên port 3000
+2. **API test**: Dùng browser mở `http://localhost:3000/api/categories` và `http://localhost:3000/api/products` để xác nhận data trả về
+
+### Browser Tests (sử dụng browser tool)
+1. **Luồng khách hàng**: Mở `http://localhost:3000/?table=1` → xem menu → thêm món → vào giỏ → checkout
+2. **Admin dashboard**: Mở `http://localhost:3000/admin/login.html` → đăng nhập → xem Kanban → quản lý menu
+3. **Responsive**: Test trên viewport mobile (375px)
+4. **Realtime**: Tạo đơn từ customer → kiểm tra đơn xuất hiện realtime trên dashboard
+
+### Manual Verification (User)
+1. Quét QR bằng điện thoại thật → đặt đơn → xem trên dashboard
+2. Kiểm tra Telegram nhận thông báo (cần cấu hình Bot Token + Chat ID)
+3. Kiểm tra VietQR hiển thị đúng thông tin ngân hàng
