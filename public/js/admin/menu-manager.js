@@ -2,12 +2,95 @@ if (!localStorage.getItem('admin_token')) window.location.href = '/admin/login.h
 
 let categories = [];
 let products = [];
+let pendingImageFile = null; // File to upload
 
 document.addEventListener('DOMContentLoaded', async () => {
     categories = await api.get('/api/categories');
     renderCategoryFilter();
     await loadProducts();
+    setupImageUpload();
 });
+
+function setupImageUpload() {
+    const area = document.getElementById('imageUploadArea');
+    const fileInput = document.getElementById('formImageFile');
+
+    // Click to open file picker
+    area.addEventListener('click', (e) => {
+        if (e.target.closest('.preview-remove')) return;
+        fileInput.click();
+    });
+
+    // File selected
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+            handleImageFile(e.target.files[0]);
+        }
+    });
+
+    // Drag & Drop
+    area.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        area.classList.add('drag-over');
+    });
+    area.addEventListener('dragleave', () => {
+        area.classList.remove('drag-over');
+    });
+    area.addEventListener('drop', (e) => {
+        e.preventDefault();
+        area.classList.remove('drag-over');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            handleImageFile(e.dataTransfer.files[0]);
+        }
+    });
+}
+
+function handleImageFile(file) {
+    if (!file.type.startsWith('image/')) {
+        showToast('Chỉ chấp nhận file ảnh!', 'error');
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('Ảnh quá lớn! Tối đa 5MB', 'error');
+        return;
+    }
+
+    pendingImageFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        showPreview(e.target.result);
+    };
+    reader.readAsDataURL(file);
+}
+
+function showPreview(src) {
+    document.getElementById('previewImg').src = src;
+    document.getElementById('uploadPreview').style.display = 'flex';
+    document.getElementById('uploadPlaceholder').style.display = 'none';
+    document.getElementById('imageUploadArea').classList.add('has-image');
+}
+
+function removeImage() {
+    pendingImageFile = null;
+    document.getElementById('formImage').value = '';
+    document.getElementById('formImageFile').value = '';
+    document.getElementById('previewImg').src = '';
+    document.getElementById('uploadPreview').style.display = 'none';
+    document.getElementById('uploadPlaceholder').style.display = 'flex';
+    document.getElementById('imageUploadArea').classList.remove('has-image');
+}
+
+async function uploadImage(file) {
+    const formData = new FormData();
+    formData.append('image', file);
+    const res = await fetch('/api/products/upload-image', {
+        method: 'POST',
+        body: formData,
+    });
+    if (!res.ok) throw new Error('Upload ảnh thất bại');
+    const data = await res.json();
+    return data.url;
+}
 
 function renderCategoryFilter() {
     const sel = document.getElementById('filterCategory');
@@ -43,7 +126,7 @@ function renderProducts() {
         ${products.map(p => {
         const cat = categories.find(c => c.id === p.category_id);
         const emoji = getProductEmoji(p.name);
-        return `<tr>
+        return `<tr class="product-row">
             <td><div class="product-cell">
               <div class="product-thumb">${p.image ? `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover;border-radius:6px">` : emoji}</div>
               <div><strong>${p.name}</strong><br><small style="color:var(--text-light)">${p.description || ''}</small></div>
@@ -69,6 +152,7 @@ function openAddProduct() {
     document.getElementById('modalTitle').textContent = '➕ Thêm món mới';
     document.getElementById('editId').value = '';
     document.getElementById('productForm').reset();
+    removeImage();
     document.getElementById('productModal').classList.add('active');
 }
 
@@ -81,23 +165,49 @@ function openEditProduct(id) {
     document.getElementById('formName').value = p.name;
     document.getElementById('formDesc').value = p.description || '';
     document.getElementById('formPrice').value = p.price;
-    document.getElementById('formImage').value = p.image || '';
+
+    // Show existing image if available
+    if (p.image) {
+        document.getElementById('formImage').value = p.image;
+        showPreview(p.image);
+    } else {
+        removeImage();
+    }
+
     document.getElementById('productModal').classList.add('active');
 }
 
 function closeModal() {
     document.getElementById('productModal').classList.remove('active');
+    pendingImageFile = null;
 }
 
 document.getElementById('productForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const editId = document.getElementById('editId').value;
+
+    // Upload image first if there's a pending file
+    let imageUrl = document.getElementById('formImage').value;
+    if (pendingImageFile) {
+        try {
+            const btn = e.target.querySelector('[type="submit"]');
+            btn.textContent = '⏳ Đang tải ảnh...';
+            btn.disabled = true;
+            imageUrl = await uploadImage(pendingImageFile);
+            btn.textContent = '💾 Lưu';
+            btn.disabled = false;
+        } catch (err) {
+            showToast('Lỗi upload ảnh: ' + err.message, 'error');
+            return;
+        }
+    }
+
     const data = {
         category_id: parseInt(document.getElementById('formCategory').value),
         name: document.getElementById('formName').value,
         description: document.getElementById('formDesc').value,
         price: parseInt(document.getElementById('formPrice').value),
-        image: document.getElementById('formImage').value,
+        image: imageUrl,
     };
 
     try {

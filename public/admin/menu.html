@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Menu - Admin WebQR</title>
     <link rel="stylesheet" href="/css/admin.css">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📋</text></svg>">
 </head>
 
 <body>
@@ -70,8 +72,21 @@
                         placeholder="35000">
                 </div>
                 <div class="form-group">
-                    <label>Hình ảnh URL</label>
-                    <input class="form-input" id="formImage" placeholder="/images/products/...">
+                    <label>Hình ảnh</label>
+                    <div class="image-upload-area" id="imageUploadArea">
+                        <div class="upload-placeholder" id="uploadPlaceholder">
+                            <div class="upload-icon">📸</div>
+                            <p>Kéo thả ảnh vào đây hoặc <span class="upload-link">chọn từ thiết bị</span></p>
+                            <p class="upload-hint">PNG, JPG, WEBP — Tối đa 5MB</p>
+                        </div>
+                        <div class="upload-preview" id="uploadPreview" style="display:none">
+                            <img id="previewImg" src="" alt="Preview">
+                            <button type="button" class="preview-remove" onclick="removeImage()"
+                                title="Xóa ảnh">✕</button>
+                        </div>
+                        <input type="file" id="formImageFile" accept="image/*" style="display:none">
+                        <input type="hidden" id="formImage">
+                    </div>
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn-admin btn-admin-primary" style="flex:1">💾 Lưu</button>
