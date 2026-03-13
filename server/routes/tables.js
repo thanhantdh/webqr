@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { all, get, run } = require('../database');
+const { all, get, run, generateTableToken } = require('../database');
 
 // GET all tables
 router.get('/', (req, res) => {
@@ -29,7 +29,10 @@ router.post('/', (req, res) => {
     const existing = get('SELECT * FROM tables_info WHERE number = ?', [number]);
     if (existing) return res.status(400).json({ error: `Bàn ${number} đã tồn tại` });
 
-    const result = run('INSERT INTO tables_info (number, status) VALUES (?, ?)', [number, 'empty']);
+    // Auto-generate unique QR token
+    const qrToken = generateTableToken();
+
+    const result = run('INSERT INTO tables_info (number, status, qr_token) VALUES (?, ?, ?)', [number, 'empty', qrToken]);
     const newTable = get('SELECT * FROM tables_info WHERE id = ?', [result.lastInsertRowid]);
     if (global.broadcastOrder) global.broadcastOrder({ type: 'table_updated', table: newTable });
     res.json(newTable);

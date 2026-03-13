@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#16162A">
+    <title>Lịch sử Đơn hàng - Admin WebQR</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <style>
+        .history-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            background: var(--bg-card);
+            padding: 16px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .history-table-container {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow-x: auto;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .history-table th {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(0, 0, 0, 0.02);
+            white-space: nowrap;
+        }
+
+        .history-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .history-table tr:hover {
+            background: rgba(0, 0, 0, 0.01);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.new { background: #dbeafe; color: #1e40af; }
+        .status-badge.preparing { background: #fef08a; color: #854d0e; }
+        .status-badge.ready { background: #fed7aa; color: #9a3412; }
+        .status-badge.completed, .status-badge.paid { background: #dcfce7; color: #166534; }
+        .status-badge.cancelled { background: #fee2e2; color: #991b1b; }
+
+        .items-list {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .items-list li {
+            margin-bottom: 4px;
+        }
+
+        .item-topping {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .empty-history {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <span class="logo-icon">☕</span>
+            <h1>Cửa Hàng Admin</h1>
+        </div>
+        <div class="sidebar-nav">
+            <a href="/admin/dashboard.html" class="nav-item"><span class="icon">📊</span> Dashboard</a>
+            <a href="/admin/menu.html" class="nav-item"><span class="icon">📋</span> Quản lý Menu</a>
+            <a href="/admin/tables.html" class="nav-item"><span class="icon">🪑</span> Quản lý Bàn</a>
+            <a href="/admin/history.html" class="nav-item active"><span class="icon">📜</span> Lịch sử Đơn</a>
+            <a href="/admin/stats.html" class="nav-item"><span class="icon">📈</span> Thống kê</a>
+            <a href="/admin/qr-print.html" class="nav-item"><span class="icon">📱</span> In QR Code</a>
+        </div>
+        <div class="sidebar-footer">
+            <a class="nav-item" onclick="logout()"><span class="icon">🚪</span> Đăng xuất</a>
+        </div>
+    </nav>
+
+    <!-- Main -->
+    <div class="main-content">
+        <div class="top-bar">
+            <h2>📜 Lịch sử mua đồ ăn</h2>
+            <div class="top-bar-actions">
+            </div>
+        </div>
+
+        <div class="page-content">
+            <div class="history-controls">
+                <div class="form-group" style="margin: 0; min-width: 150px;">
+                    <label style="font-size: 0.8rem; margin-bottom: 4px;">Lọc theo ngày</label>
+                    <input type="date" id="filterDate" class="form-input">
+                </div>
+                <div class="form-group" style="margin: 0; min-width: 150px;">
+                    <label style="font-size: 0.8rem; margin-bottom: 4px;">Số bàn</label>
+                    <select id="filterTable" class="form-select">
+                        <option value="">Tất cả các bàn</option>
+                        <!-- Options generated dynamically -->
+                    </select>
+                </div>
+                <div class="form-group" style="margin: 0; min-width: 150px;">
+                    <label style="font-size: 0.8rem; margin-bottom: 4px;">Trạng thái</label>
+                    <select id="filterStatus" class="form-select">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="new">Mới</option>
+                        <option value="preparing">Đang làm</option>
+                        <option value="ready">Sẵn sàng</option>
+                        <option value="completed">Đã xong / Đã thu tiền</option>
+                        <option value="cancelled">Đã hủy</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin: 0; align-self: flex-end;">
+                    <button class="btn-admin btn-admin-primary" onclick="loadHistory()">Tìm kiếm</button>
+                    <button class="btn-admin btn-admin-secondary" onclick="resetFilters()">Tải lại</button>
+                </div>
+            </div>
+
+            <div class="history-table-container">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Mã Đơn / Bàn</th>
+                            <th>Thời gian</th>
+                            <th>Chi tiết món ăn</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTbody">
+                        <tr><td colspan="5" class="empty-history">Đang tải dữ liệu...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/shared/api.js"></script>
+    <script src="/js/admin/history.js"></script>
+</body>
+
+</html>

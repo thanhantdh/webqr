@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#16162A">
     <title>Quản lý Menu - Admin WebQR</title>
     <link rel="stylesheet" href="/css/admin.css">
     <link rel="icon"
@@ -12,13 +13,14 @@
 
 <body>
     <nav class="sidebar">
-        <div class="sidebar-logo"><span class="logo-icon">🍜</span>
-            <h1>WebQR Admin</h1>
+        <div class="sidebar-logo"><span class="logo-icon">☕</span>
+            <h1>Cửa Hàng Admin</h1>
         </div>
         <div class="sidebar-nav">
             <a href="/admin/dashboard.html" class="nav-item"><span class="icon">📊</span> Dashboard</a>
             <a href="/admin/menu.html" class="nav-item active"><span class="icon">📋</span> Quản lý Menu</a>
             <a href="/admin/tables.html" class="nav-item"><span class="icon">🪑</span> Quản lý Bàn</a>
+            <a href="/admin/history.html" class="nav-item"><span class="icon">📜</span> Lịch sử Đơn</a>
             <a href="/admin/stats.html" class="nav-item"><span class="icon">📈</span> Thống kê</a>
             <a href="/admin/qr-print.html" class="nav-item"><span class="icon">📱</span> In QR Code</a>
         </div>
@@ -41,6 +43,19 @@
                     </select>
                 </div>
                 <span id="productCount" style="color:var(--text-secondary);font-size:0.9rem"></span>
+            </div>
+            <!-- Bulk action bar -->
+            <div id="bulkBar"
+                style="display:none;padding:12px 16px;background:#eef2ff;border-radius:10px;margin-bottom:16px;display:none;align-items:center;gap:12px;flex-wrap:wrap;">
+                <span style="font-weight:600;color:#4338ca;">📌 Đã chọn <span id="selectedCount">0</span> món</span>
+                <button class="btn-admin btn-admin-primary" onclick="bulkToggle(1)"
+                    style="font-size:13px;padding:6px 14px;">✅ Bật bán</button>
+                <button class="btn-admin btn-admin-secondary" onclick="bulkToggle(0)"
+                    style="font-size:13px;padding:6px 14px;">⛔ Tắt bán</button>
+                <button class="btn-admin" onclick="bulkDelete()"
+                    style="font-size:13px;padding:6px 14px;background:#fee2e2;color:#991b1b;">🗑️ Xóa</button>
+                <button class="btn-admin btn-admin-secondary" onclick="clearSelection()"
+                    style="font-size:13px;padding:6px 14px;">✕ Bỏ chọn</button>
             </div>
             <div id="menuContainer">
                 <div style="text-align:center;padding:40px;color:var(--text-light)">Đang tải...</div>

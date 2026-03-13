@@ -1,44 +1,44 @@
 let selectedPayment = 'cash';
 
 document.addEventListener('DOMContentLoaded', () => {
-    const tableNum = getTableNumber();
-    document.getElementById('tableNumber').textContent = tableNum;
-    document.getElementById('backBtn').href = `/cart.html?table=${tableNum}`;
-    renderCheckout();
+  const tableNum = getTableNumber();
+  document.getElementById('tableNumber').textContent = tableNum;
+  document.getElementById('backBtn').href = buildMenuUrl('/cart.html');
+  renderCheckout();
 });
 
 function renderCheckout() {
-    const container = document.getElementById('checkoutContainer');
-    const items = cart.getAll();
+  const container = document.getElementById('checkoutContainer');
+  const items = cart.getAll();
 
-    if (items.length === 0) {
-        container.innerHTML = `
+  if (items.length === 0) {
+    container.innerHTML = `
       <div class="empty-state">
         <div class="icon">🛒</div>
         <h3>Giỏ hàng trống</h3>
         <p>Hãy thêm món trước khi thanh toán</p>
-        <a href="/?table=${getTableNumber()}" class="btn btn-primary" style="margin-top:16px">📋 Xem Menu</a>
+        <a href="${buildMenuUrl('/')}" class="btn btn-primary" style="margin-top:16px">📋 Xem Menu</a>
       </div>
     `;
-        return;
-    }
+    return;
+  }
 
-    const total = cart.getTotal();
-    const count = cart.getCount();
+  const total = cart.getTotal();
+  const count = cart.getCount();
 
-    const itemsSummary = items.map(item => {
-        let details = [];
-        if (item.size) details.push(item.size);
-        if (item.toppings?.length) details.push(item.toppings.join(', '));
-        return `
+  const itemsSummary = items.map(item => {
+    let details = [];
+    if (item.size) details.push(item.size);
+    if (item.toppings?.length) details.push(item.toppings.join(', '));
+    return `
       <div class="summary-row">
         <span>${item.name} x${item.quantity}${details.length ? ` (${details.join(', ')})` : ''}</span>
         <span>${formatMoney(item.price * item.quantity)}</span>
       </div>
     `;
-    }).join('');
+  }).join('');
 
-    container.innerHTML = `
+  container.innerHTML = `
     <div class="order-info-card">
       <h3>📋 Đơn hàng của bạn</h3>
       ${itemsSummary}
@@ -79,56 +79,56 @@ function renderCheckout() {
 }
 
 function selectPayment(method) {
-    selectedPayment = method;
-    document.querySelectorAll('.payment-option').forEach(opt => {
-        opt.classList.toggle('selected', opt.dataset.payment === method);
-    });
+  selectedPayment = method;
+  document.querySelectorAll('.payment-option').forEach(opt => {
+    opt.classList.toggle('selected', opt.dataset.payment === method);
+  });
 }
 
 async function placeOrder() {
-    const btn = document.getElementById('btnPlaceOrder');
-    btn.disabled = true;
-    btn.innerHTML = '⏳ Đang xử lý...';
+  const btn = document.getElementById('btnPlaceOrder');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Đang xử lý...';
 
-    try {
-        const items = cart.getAll().map(item => ({
-            product_id: item.product_id,
-            quantity: item.quantity,
-            size: item.size,
-            toppings: item.toppings,
-            note: item.note,
-        }));
+  try {
+    const items = cart.getAll().map(item => ({
+      product_id: item.product_id,
+      quantity: item.quantity,
+      size: item.size,
+      toppings: item.toppings,
+      note: item.note,
+    }));
 
-        const orderNote = document.getElementById('orderNote')?.value || '';
+    const orderNote = document.getElementById('orderNote')?.value || '';
 
-        const result = await api.post('/api/orders', {
-            table_number: getTableNumber(),
-            items,
-            payment_method: selectedPayment,
-            note: orderNote,
-        });
+    const result = await api.post('/api/orders', {
+      table_number: getTableNumber(),
+      items,
+      payment_method: selectedPayment,
+      note: orderNote,
+    });
 
-        // Clear cart
-        cart.clear();
+    // Clear cart
+    cart.clear();
 
-        // Redirect to order status or show VietQR
-        if (selectedPayment === 'vietqr' && result.vietqr) {
-            showVietQR(result);
-        } else {
-            window.location.href = `/order-status.html?table=${getTableNumber()}&order=${result.id}`;
-        }
-
-    } catch (error) {
-        console.error('Order failed:', error);
-        showToast('Đặt hàng thất bại. Vui lòng thử lại!', 'error');
-        btn.disabled = false;
-        btn.innerHTML = '✅ Xác nhận đặt hàng';
+    // Redirect to order status or show VietQR
+    if (selectedPayment === 'vietqr' && result.vietqr) {
+      showVietQR(result);
+    } else {
+      window.location.href = buildMenuUrl('/order-status.html') + `&order=${result.id}`;
     }
+
+  } catch (error) {
+    console.error('Order failed:', error);
+    showToast('Đặt hàng thất bại. Vui lòng thử lại!', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '✅ Xác nhận đặt hàng';
+  }
 }
 
 function showVietQR(order) {
-    const container = document.getElementById('checkoutContainer');
-    container.innerHTML = `
+  const container = document.getElementById('checkoutContainer');
+  container.innerHTML = `
     <div class="order-info-card" style="text-align:center">
       <h3 style="justify-content:center">✅ Đơn hàng #${order.id} đã được tạo!</h3>
       <p style="color:var(--text-secondary);margin-bottom:16px">Bàn ${order.table_number} • ${formatMoney(order.total_amount)}</p>
@@ -146,14 +146,32 @@ function showVietQR(order) {
       </div>
     </div>
     
-    <button class="btn btn-primary btn-block btn-lg" style="margin-top:16px" 
-      onclick="window.location.href='/order-status.html?table=${order.table_number}&order=${order.id}'">
-      📋 Xem trạng thái đơn hàng →
+    <button class="btn btn-primary btn-block btn-lg" style="margin-top:20px; background-color:#10b981;" 
+      onclick="confirmPayment(${order.id})">
+      ✅ Tôi đã thanh toán xong
     </button>
     
-    <button class="btn btn-outline btn-block" style="margin-top:8px" 
-      onclick="window.location.href='/?table=${order.table_number}'">
-      ➕ Gọi thêm món
+    <button class="btn btn-outline btn-block" style="margin-top:12px" 
+      onclick="window.location.href=buildMenuUrl('/order-status.html') + '&order=${order.id}'">
+      📋 Xem trạng thái đơn hàng
+    </button>
+    
+    <button class="btn btn-outline btn-block" style="margin-top:8px; border:none; color:var(--text-secondary);" 
+      onclick="window.location.href=buildMenuUrl('/')">
+      ← Quay lại Menu
     </button>
   `;
+}
+
+function confirmPayment(orderId) {
+    showToast('Cửa hàng sẽ kiểm tra và chuẩn bị món cho bạn', 'success');
+    // Button styling change to show it's clicked
+    const btn = event.target || event.srcElement;
+    if(btn) {
+        btn.innerHTML = '⏳ Vui lòng đợi...';
+        btn.disabled = true;
+    }
+    setTimeout(() => {
+        window.location.href = buildMenuUrl('/order-status.html') + '&order=' + orderId;
+    }, 2000);
 }

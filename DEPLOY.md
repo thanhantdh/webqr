@@ -157,6 +157,7 @@ Dán nội dung:
 ```
 PORT=3000
 ADMIN_PASSWORD=matkhau_cua_ban
+MASTER_API_KEY=WQR-MASTER-XXXX-XXXX
 BANK_ID=TCB
 BANK_ACCOUNT=99902052007
 BANK_NAME=DANG THANH AN
@@ -244,23 +245,50 @@ Sau khi có URL thật (ví dụ `https://quanxyz.com`), vào trang admin:
 5. Tìm `"chat":{"id": -XXXXXXXXX}` → đó là **Chat ID**
 6. Cập nhật vào `.env` hoặc biến môi trường trên hosting
 
-### 4. Cập nhật code
-Khi sửa code xong:
+### 5. Quản lý License Key (Bán thuê theo tháng)
 
+Hệ thống sử dụng **License Key** thay cho mật khẩu để kiểm soát quyền truy cập Admin.
+
+**Đăng nhập bằng Master Key:**
+Dùng `MASTER_API_KEY` trong file `.env` để đăng nhập với quyền Super Admin (không bao giờ hết hạn).
+
+**Tạo key cho khách hàng qua CLI (trên VPS):**
+```bash
+# Tạo key mới (30 ngày)
+node scripts/manage_keys.js create "Cafe ABC" "0901234567" 30
+
+# Xem tất cả key
+node scripts/manage_keys.js list
+
+# Gia hạn thêm 30 ngày
+node scripts/manage_keys.js extend WQR-XXXX-XXXX-XXXX 30
+
+# Thu hồi key
+node scripts/manage_keys.js revoke WQR-XXXX-XXXX-XXXX
+```
+
+**Hoặc quản lý qua giao diện web:**
+Đăng nhập bằng Master Key → Vào trang **Quản lý Key** trong sidebar.
+
+### 4. Cập nhật code (Khi bạn sửa đổi giao diện hoặc chức năng)
+Khi bạn sửa code xong trên máy tính cá nhân, bạn không cần cài lại VPS. Chỉ cần làm theo "Quy trình 2 nhịp" siêu tốc này:
+
+**Nhịp 1: Đẩy code mới từ máy tính lên kho GitHub**
+Mở Terminal/PowerShell tại thư mục WebQR trên máy tính của bạn và gõ:
 ```bash
 git add .
-git commit -m "Mô tả thay đổi"
+git commit -m "Cập nhật chức năng mới"
 git push
 ```
 
-- **Render/Railway**: Tự động deploy lại khi push
-- **VPS**: SSH vào rồi chạy:
-  ```bash
-  cd /home/webqr
-  git pull
-  npm install
-  pm2 restart webqr
-  ```
+**Nhịp 2: Rút code về VPS và khởi động lại**
+Mở phần mềm SSH để kết nối vào màn hình đen VPS (root@IP...), gõ đúng cụm lệnh này:
+```bash
+cd /home/webqr
+git pull origin main
+pm2 restart webqr
+```
+*(Chỉ mất 5 giây là trang web của bạn lột xác sang phiên bản mới hoàn toàn!)*
 
 ---
 

@@ -1,16 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const tableNum = getTableNumber();
-    document.getElementById('tableNumber').textContent = tableNum;
-    document.getElementById('backBtn').href = `/?table=${tableNum}`;
-    renderCart();
+  const tableNum = getTableNumber();
+  document.getElementById('tableNumber').textContent = tableNum;
+  document.getElementById('backBtn').href = `/?table=${tableNum}`;
+  renderCart();
 });
 
 function renderCart() {
-    const container = document.getElementById('cartContainer');
-    const items = cart.getAll();
+  const container = document.getElementById('cartContainer');
+  const items = cart.getAll();
 
-    if (items.length === 0) {
-        container.innerHTML = `
+  if (items.length === 0) {
+    container.innerHTML = `
       <div class="empty-state">
         <div class="icon">🛒</div>
         <h3>Giỏ hàng trống</h3>
@@ -18,20 +18,20 @@ function renderCart() {
         <a href="/?table=${getTableNumber()}" class="btn btn-primary" style="margin-top:16px">📋 Xem Menu</a>
       </div>
     `;
-        return;
-    }
+    return;
+  }
 
-    const itemsHtml = items.map(item => {
-        const emoji = getProductEmoji(item.name);
-        const imgContent = item.image
-            ? `<img src="${item.image}" alt="${item.name}">`
-            : emoji;
+  const itemsHtml = items.map(item => {
+    const emoji = getProductEmoji(item.name);
+    const imgContent = item.image
+      ? `<img src="${item.image}" alt="${item.name}">`
+      : emoji;
 
-        let details = [];
-        if (item.size) details.push(item.size);
-        if (item.toppings && item.toppings.length > 0) details.push(item.toppings.join(', '));
+    let details = [];
+    if (item.size) details.push(item.size);
+    if (item.toppings && item.toppings.length > 0) details.push(item.toppings.join(', '));
 
-        return `
+    return `
       <div class="cart-item" data-id="${item.id}">
         <div class="cart-item-img">${imgContent}</div>
         <div class="cart-item-info">
@@ -50,12 +50,12 @@ function renderCart() {
         <button class="cart-delete" onclick="removeItem(${item.id})" title="Xóa">🗑️</button>
       </div>
     `;
-    }).join('');
+  }).join('');
 
-    const total = cart.getTotal();
-    const count = cart.getCount();
+  const total = cart.getTotal();
+  const count = cart.getCount();
 
-    container.innerHTML = `
+  container.innerHTML = `
     <ul class="cart-items">${itemsHtml}</ul>
     
     <div class="cart-summary">
@@ -80,27 +80,27 @@ function renderCart() {
 }
 
 function updateQty(id, newQty) {
-    if (newQty <= 0) {
-        removeItem(id);
-        return;
-    }
-    cart.update(id, newQty);
-    renderCart();
+  if (newQty <= 0) {
+    removeItem(id);
+    return;
+  }
+  cart.update(id, newQty);
+  renderCart();
 }
 
 function removeItem(id) {
-    cart.remove(id);
-    renderCart();
-    showToast('Đã xóa khỏi giỏ hàng');
+  cart.remove(id);
+  renderCart();
+  showToast('Đã xóa khỏi giỏ hàng');
 }
 
 function clearAll() {
-    if (confirm('Xóa tất cả món trong giỏ hàng?')) {
-        cart.clear();
-        renderCart();
-    }
+  if (confirm('Xóa tất cả món trong giỏ hàng?')) {
+    cart.clear();
+    renderCart();
+  }
 }
 
 function goToCheckout() {
-    window.location.href = `/checkout.html?table=${getTableNumber()}`;
+  window.location.href = buildMenuUrl('/checkout.html');
 }

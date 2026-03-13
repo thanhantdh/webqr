@@ -3,8 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập - Admin WebQR</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#16162A">
+    <title>Đăng nhập Admin - WebQR</title>
     <link rel="stylesheet" href="/css/admin.css">
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
@@ -12,16 +13,16 @@
 
 <body class="login-page">
     <div class="login-card">
-        <div class="logo">🍜</div>
-        <h1>WebQR Admin</h1>
-        <p>Đăng nhập để quản lý quán</p>
+        <div class="logo">☕</div>
+        <h1>Quản lý Cửa Hàng</h1>
+        <p>Phiên bản Dành cho nội bộ Cửa Hàng</p>
         <form id="loginForm">
             <div class="form-group">
-                <input type="password" class="form-input" id="password" placeholder="Nhập mật khẩu..." autofocus
-                    required>
+                <input type="password" class="form-input" id="password"
+                    placeholder="Nhập mật khẩu quản trị..." autofocus required>
             </div>
             <button type="submit" class="btn-admin btn-admin-primary">🔓 Đăng nhập</button>
-            <div class="login-error" id="loginError">Mật khẩu không đúng</div>
+            <div class="login-error" id="loginError">Mật khẩu không hợp lệ</div>
         </form>
     </div>
 
@@ -32,7 +33,7 @@
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const password = document.getElementById('password').value;
+            const password = document.getElementById('password').value.trim();
             const errorEl = document.getElementById('loginError');
             errorEl.style.display = 'none';
 
@@ -45,10 +46,13 @@
                 const data = await res.json();
                 if (data.success) {
                     localStorage.setItem('admin_token', data.token);
+                    if (data.isMaster) localStorage.setItem('is_master', '1');
+                    if (data.expires_at) localStorage.setItem('license_expires', data.expires_at);
+                    if (data.customer_name) localStorage.setItem('license_name', data.customer_name);
                     window.location.href = '/admin/dashboard.html';
                 } else {
                     errorEl.style.display = 'block';
-                    errorEl.textContent = data.error || 'Mật khẩu không đúng';
+                    errorEl.textContent = data.error || 'Mật khẩu không hợp lệ';
                 }
             } catch (err) {
                 errorEl.style.display = 'block';

@@ -114,12 +114,14 @@ function renderProducts() {
 
     if (products.length === 0) {
         container.innerHTML = '<p style="text-align:center;padding:40px;color:var(--text-light)">Chưa có sản phẩm nào</p>';
+        updateBulkBar();
         return;
     }
 
     container.innerHTML = `
     <table class="menu-table">
       <thead><tr>
+        <th style="width:40px"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" title="Chọn tất cả"></th>
         <th>Sản phẩm</th><th>Danh mục</th><th>Giá</th><th>Trạng thái</th><th>Hành động</th>
       </tr></thead>
       <tbody>
@@ -127,6 +129,7 @@ function renderProducts() {
         const cat = categories.find(c => c.id === p.category_id);
         const emoji = getProductEmoji(p.name);
         return `<tr class="product-row">
+            <td><input type="checkbox" class="product-check" value="${p.id}" onchange="updateBulkBar()"></td>
             <td><div class="product-cell">
               <div class="product-thumb">${p.image ? `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover;border-radius:6px">` : emoji}</div>
               <div><strong>${p.name}</strong><br><small style="color:var(--text-light)">${p.description || ''}</small></div>
@@ -146,6 +149,60 @@ function renderProducts() {
       </tbody>
     </table>
   `;
+    updateBulkBar();
+}
+
+// Select All / Bulk Actions
+function toggleSelectAll(el) {
+    document.querySelectorAll('.product-check').forEach(cb => cb.checked = el.checked);
+    updateBulkBar();
+}
+
+function updateBulkBar() {
+    const checked = document.querySelectorAll('.product-check:checked');
+    const bar = document.getElementById('bulkBar');
+    if (checked.length > 0) {
+        bar.style.display = 'flex';
+        document.getElementById('selectedCount').textContent = checked.length;
+    } else {
+        bar.style.display = 'none';
+    }
+}
+
+function getSelectedIds() {
+    return [...document.querySelectorAll('.product-check:checked')].map(cb => parseInt(cb.value));
+}
+
+function clearSelection() {
+    document.querySelectorAll('.product-check').forEach(cb => cb.checked = false);
+    const selectAll = document.getElementById('selectAll');
+    if (selectAll) selectAll.checked = false;
+    updateBulkBar();
+}
+
+async function bulkToggle(newValue) {
+    const ids = getSelectedIds();
+    if (ids.length === 0) return;
+    const action = newValue ? 'BẬT bán' : 'TẮT bán';
+    if (!confirm(`${action} cho ${ids.length} món đã chọn?`)) return;
+
+    for (const id of ids) {
+        await api.put(`/api/products/${id}`, { is_available: newValue });
+    }
+    showToast(`Đã ${action} ${ids.length} món`);
+    await loadProducts();
+}
+
+async function bulkDelete() {
+    const ids = getSelectedIds();
+    if (ids.length === 0) return;
+    if (!confirm(`⚠️ Xóa ${ids.length} món đã chọn? Không thể hoàn tác!`)) return;
+
+    for (const id of ids) {
+        await api.delete(`/api/products/${id}`);
+    }
+    showToast(`Đã xóa ${ids.length} món`);
+    await loadProducts();
 }
 
 function openAddProduct() {

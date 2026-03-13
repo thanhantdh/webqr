@@ -4,7 +4,7 @@ const { all, get, run } = require('../database');
 const { sendOrderNotification } = require('../services/telegram');
 const { generateVietQRUrl } = require('../services/vietqr');
 
-// GET all orders
+// GET all orders with items
 router.get('/', (req, res) => {
     const { status, date } = req.query;
     let query = 'SELECT * FROM orders';
@@ -24,7 +24,15 @@ router.get('/', (req, res) => {
     query += ' ORDER BY created_at DESC';
 
     const orders = all(query, params);
-    res.json(orders);
+    
+    // Attach items to each order
+    const result = orders.map(order => {
+        const items = all('SELECT * FROM order_items WHERE order_id = ?', [order.id]);
+        items.forEach(item => { item.toppings = JSON.parse(item.toppings || '[]'); });
+        return { ...order, items };
+    });
+
+    res.json(result);
 });
 
 // GET order by ID with items

@@ -1,18 +1,27 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="Menu đặt đồ ăn & thức uống tại bàn qua QR code">
+  <meta name="description" content="Menu đặt đồ ăn & thức uống tại bàn qua QR code nhanh chóng, tiện lợi">
+  <meta name="keywords" content="đặt món, menu qr, quán cafe, trà sữa, webqr, gọi món tại bàn">
+  <meta name="theme-color" content="#FF6B35">
+  <meta property="og:title" content="Menu - WebQR Ordering">
+  <meta property="og:description"
+    content="Menu đặt đồ ăn & thức uống tại bàn qua QR tiện lợi, mượt mà và cực kỳ hấp dẫn.">
+  <meta property="og:type" content="website">
   <title>Menu - WebQR Ordering</title>
   <link rel="stylesheet" href="/css/style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍜</text></svg>">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☕</text></svg>">
 </head>
+
 <body>
   <!-- Header -->
   <header class="header">
     <div class="header-content">
-      <h1>🍜 WebQR Menu</h1>
+      <h1>☕ Cafe & Trà</h1>
       <div class="table-badge" id="tableBadge">
         🪑 Bàn <span id="tableNumber">1</span>
       </div>
@@ -28,11 +37,13 @@
 
   <!-- Products -->
   <main class="products-section" id="productsContainer">
-    <div class="loading"><div class="spinner"></div></div>
+    <div class="loading">
+      <div class="spinner"></div>
+    </div>
   </main>
 
   <!-- Floating Cart Button -->
-  <button class="floating-cart hidden" id="floatingCart" onclick="window.location.href='/cart.html?table='+getTableNumber()">
+  <button class="floating-cart hidden" id="floatingCart" onclick="window.location.href=buildMenuUrl('/cart.html')">
     🛒 Giỏ hàng <span class="cart-count">0</span>
     <span class="cart-total">0đ</span>
   </button>
@@ -53,4 +64,5 @@
   <script src="/js/shared/api.js"></script>
   <script src="/js/menu.js"></script>
 </body>
+
 </html>

@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#16162A">
     <title>Dashboard - Admin WebQR</title>
     <link rel="stylesheet" href="/css/admin.css">
     <link rel="icon"
@@ -14,15 +15,18 @@
     <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-logo">
-            <span class="logo-icon">🍜</span>
-            <h1>WebQR Admin</h1>
+            <span class="logo-icon">☕</span>
+            <h1>Cửa Hàng Admin</h1>
         </div>
         <div class="sidebar-nav">
             <a href="/admin/dashboard.html" class="nav-item active"><span class="icon">📊</span> Dashboard</a>
             <a href="/admin/menu.html" class="nav-item"><span class="icon">📋</span> Quản lý Menu</a>
             <a href="/admin/tables.html" class="nav-item"><span class="icon">🪑</span> Quản lý Bàn</a>
+            <a href="/admin/history.html" class="nav-item"><span class="icon">📜</span> Lịch sử Đơn</a>
             <a href="/admin/stats.html" class="nav-item"><span class="icon">📈</span> Thống kê</a>
             <a href="/admin/qr-print.html" class="nav-item"><span class="icon">📱</span> In QR Code</a>
+            <a href="/admin/super-admin.html" class="nav-item" id="superAdminLink" style="display:none"><span
+                    class="icon">🔑</span> Quản lý Key</a>
         </div>
         <div class="sidebar-footer">
             <a class="nav-item" onclick="logout()"><span class="icon">🚪</span> Đăng xuất</a>
@@ -34,6 +38,8 @@
         <div class="top-bar">
             <h2>📊 Dashboard Đơn Hàng</h2>
             <div class="top-bar-actions">
+                <span id="licenseBadge"
+                    style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-right:10px;"></span>
                 <span id="soundToggle" class="btn-admin btn-admin-secondary" onclick="toggleSound()"
                     style="cursor:pointer">🔔 Âm thanh: BẬT</span>
             </div>
@@ -106,6 +112,30 @@
 
     <script src="/js/shared/api.js"></script>
     <script src="/js/admin/dashboard.js"></script>
+    <script>
+        // License badge
+        (function () {
+            const expiresAt = localStorage.getItem('license_expires');
+            const badge = document.getElementById('licenseBadge');
+
+            if (expiresAt) {
+                const days = Math.ceil((new Date(expiresAt) - new Date()) / (1000 * 60 * 60 * 24));
+                if (days > 7) {
+                    badge.textContent = `🟢 Hạn VPS: Còn ${days} ngày`;
+                    badge.style.background = '#d1fae5';
+                    badge.style.color = '#065f46';
+                } else if (days > 0) {
+                    badge.textContent = `🟡 Hạn VPS: Còn ${days} ngày`;
+                    badge.style.background = '#fef3c7';
+                    badge.style.color = '#92400e';
+                } else {
+                    badge.textContent = `🔴 VPS Đã Hết Hạn!`;
+                    badge.style.background = '#fee2e2';
+                    badge.style.color = '#991b1b';
+                }
+            }
+        })();
+    </script>
 </body>
 
 </html>

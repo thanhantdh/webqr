@@ -1,6 +1,7 @@
 const initSqlJs = require('sql.js');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 const dbPath = path.join(__dirname, '..', 'data', 'database.sqlite');
 const dataDir = path.join(__dirname, '..', 'data');
@@ -18,6 +19,11 @@ function saveDb() {
 
 // Auto-save every 5 seconds
 setInterval(saveDb, 5000);
+
+// Generate unique token for table QR codes
+function generateTableToken() {
+  return crypto.randomBytes(4).toString('hex'); // 8 chars, e.g. "a3f1b2c9"
+}
 
 async function initDatabase() {
   const SQL = await initSqlJs();
@@ -69,11 +75,30 @@ async function initDatabase() {
     CREATE TABLE IF NOT EXISTS tables_info (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       number INTEGER NOT NULL UNIQUE,
+      qr_token TEXT UNIQUE,
       status TEXT DEFAULT 'empty' CHECK(status IN ('empty', 'occupied')),
       current_order_id INTEGER DEFAULT NULL,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Migration: add qr_token column if missing (for existing databases)
+  try {
+    db.exec("SELECT qr_token FROM tables_info LIMIT 1");
+  } catch (e) {
+    db.run("ALTER TABLE tables_info ADD COLUMN qr_token TEXT");
+    // Generate tokens for existing tables that don't have one
+    const existingTables = db.exec("SELECT id FROM tables_info WHERE qr_token IS NULL");
+    if (existingTables.length > 0) {
+      for (const row of existingTables[0].values) {
+        const token = generateTableToken();
+        db.run("UPDATE tables_info SET qr_token = ? WHERE id = ?", [token, row[0]]);
+      }
+      console.log('🔑 Generated QR tokens for existing tables');
+    }
+    // Create unique index after populating tokens
+    try { db.run("CREATE UNIQUE INDEX IF NOT EXISTS idx_qr_token ON tables_info(qr_token)"); } catch (e2) { }
+  }
 
   db.run(`
     CREATE TABLE IF NOT EXISTS orders (
@@ -102,6 +127,20 @@ async function initDatabase() {
       price INTEGER NOT NULL,
       subtotal INTEGER NOT NULL,
       FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+    )
+  `);
+
+  // API Keys for subscription system
+  db.run(`
+    CREATE TABLE IF NOT EXISTS api_keys (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      key TEXT UNIQUE NOT NULL,
+      customer_name TEXT NOT NULL,
+      customer_phone TEXT DEFAULT '',
+      expires_at DATETIME NOT NULL,
+      is_active INTEGER DEFAULT 1,
+      warned_expiry INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
 
@@ -220,9 +259,10 @@ function seedData() {
     );
   }
 
-  // 30 tables
+  // 30 tables with unique QR tokens
   for (let i = 1; i <= 30; i++) {
-    db.run('INSERT INTO tables_info (number, status) VALUES (?, ?)', [i, 'empty']);
+    const token = generateTableToken();
+    db.run('INSERT INTO tables_info (number, status, qr_token) VALUES (?, ?, ?)', [i, 'empty', token]);
   }
 
   console.log('✅ Seed data complete: 7 categories, ' + products.length + ' products, 30 tables');
@@ -255,4 +295,4 @@ function run(sql, params = []) {
   return { lastInsertRowid: lastId, changes };
 }
 
-module.exports = { initDatabase, all, get, run, saveDb };
+module.exports = { initDatabase, all, get, run, saveDb, generateTableToken };

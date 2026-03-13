@@ -15,7 +15,6 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // CORS
 app.use((req, res, next) => {
@@ -25,6 +24,37 @@ app.use((req, res, next) => {
     if (req.method === 'OPTIONS') return res.sendStatus(200);
     next();
 });
+
+// Protect customer-facing pages (require ?token= from QR code)
+// MUST be before express.static so we intercept HTML pages first
+const customerPages = ['/', '/index.html', '/cart.html', '/checkout.html', '/order-status.html'];
+app.use((req, res, next) => {
+    // Only check customer-facing HTML pages
+    if (!customerPages.includes(req.path)) return next();
+
+    const token = req.query.token;
+    const table = req.query.table;
+
+    // If no token provided, show scan-qr page
+    if (!token) {
+        return res.sendFile(path.join(__dirname, '..', 'public', 'scan-qr.html'));
+    }
+
+    // Validate token against the database
+    const { get: dbGet } = require('./database');
+    const tableRow = table
+        ? dbGet('SELECT * FROM tables_info WHERE number = ? AND qr_token = ?', [table, token])
+        : dbGet('SELECT * FROM tables_info WHERE qr_token = ?', [token]);
+
+    if (!tableRow) {
+        return res.sendFile(path.join(__dirname, '..', 'public', 'scan-qr.html'));
+    }
+
+    next();
+});
+
+// Static files (after protection middleware)
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Auth
 const { loginHandler } = require('./middleware/auth');
@@ -89,6 +119,7 @@ app.get('*', (req, res) => {
 // Start with async DB init
 async function start() {
     await initDatabase();
+
     server.listen(PORT, () => {
         console.log('');
         console.log('╔══════════════════════════════════════════╗');

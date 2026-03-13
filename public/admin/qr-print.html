@@ -3,20 +3,22 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>In QR Code - Admin WebQR</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#16162A">
+    <title>In Mã QR - Admin WebQR</title>
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 
 <body>
     <nav class="sidebar">
-        <div class="sidebar-logo"><span class="logo-icon">🍜</span>
-            <h1>WebQR Admin</h1>
+        <div class="sidebar-logo"><span class="logo-icon">☕</span>
+            <h1>Cửa Hàng Admin</h1>
         </div>
         <div class="sidebar-nav">
             <a href="/admin/dashboard.html" class="nav-item"><span class="icon">📊</span> Dashboard</a>
             <a href="/admin/menu.html" class="nav-item"><span class="icon">📋</span> Quản lý Menu</a>
             <a href="/admin/tables.html" class="nav-item"><span class="icon">🪑</span> Quản lý Bàn</a>
+            <a href="/admin/history.html" class="nav-item"><span class="icon">📜</span> Lịch sử Đơn</a>
             <a href="/admin/stats.html" class="nav-item"><span class="icon">📈</span> Thống kê</a>
             <a href="/admin/qr-print.html" class="nav-item active"><span class="icon">📱</span> In QR Code</a>
         </div>
@@ -55,7 +57,7 @@
             grid.innerHTML = '<p style="text-align:center;padding:40px;color:var(--text-light);grid-column:1/-1">Đang tạo mã QR...</p>';
 
             try {
-                // Load tables from database
+                // Load tables from database (each table has its own qr_token)
                 const tables = await api.get('/api/tables');
 
                 if (tables.length === 0) {
@@ -66,13 +68,14 @@
                 grid.innerHTML = '';
 
                 for (const table of tables) {
-                    const url = `${baseUrl}/?table=${table.number}`;
+                    // Each table has its own unique token
+                    const url = `${baseUrl}/?table=${table.number}&token=${table.qr_token}`;
                     const div = document.createElement('div');
                     div.className = 'qr-item';
                     div.innerHTML = `
                         <div style="width:180px;height:180px;display:flex;align-items:center;justify-content:center;color:var(--text-light)">Đang tạo...</div>
                         <h4>Bàn ${table.number}</h4>
-                        <p>${url}</p>
+                        <p style="font-size:11px;word-break:break-all">${url}</p>
                     `;
                     grid.appendChild(div);
 

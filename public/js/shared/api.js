@@ -59,6 +59,20 @@ function getTableNumber() {
     return parseInt(params.get('table')) || 1;
 }
 
+// Get menu token from URL (for private menu access)
+function getMenuToken() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('token') || '';
+}
+
+// Build URL with table number and token
+function buildMenuUrl(page, tableNum) {
+    const token = getMenuToken();
+    let url = `${page}?table=${tableNum || getTableNumber()}`;
+    if (token) url += `&token=${token}`;
+    return url;
+}
+
 // Cart management (localStorage)
 const cart = {
     KEY: 'webqr_cart',
