@@ -41,8 +41,6 @@
             <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
             <h2>📊 Dashboard Đơn Hàng</h2>
             <div class="top-bar-actions">
-                <span id="licenseBadge"
-                    style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-right:10px;"></span>
                 <span id="soundToggle" class="btn-admin btn-admin-secondary" onclick="toggleSound()"
                     style="cursor:pointer">🔔 Âm thanh: BẬT</span>
             </div>
@@ -116,29 +114,6 @@
     <script src="/js/shared/api.js"></script>
     <script src="/js/admin/dashboard.js"></script>
     <script>
-        // License badge
-        (function () {
-            const expiresAt = localStorage.getItem('license_expires');
-            const badge = document.getElementById('licenseBadge');
-
-            if (expiresAt) {
-                const days = Math.ceil((new Date(expiresAt) - new Date()) / (1000 * 60 * 60 * 24));
-                if (days > 7) {
-                    badge.textContent = `🟢 Hạn VPS: Còn ${days} ngày`;
-                    badge.style.background = '#d1fae5';
-                    badge.style.color = '#065f46';
-                } else if (days > 0) {
-                    badge.textContent = `🟡 Hạn VPS: Còn ${days} ngày`;
-                    badge.style.background = '#fef3c7';
-                    badge.style.color = '#92400e';
-                } else {
-                    badge.textContent = `🔴 VPS Đã Hết Hạn!`;
-                    badge.style.background = '#fee2e2';
-                    badge.style.color = '#991b1b';
-                }
-            }
-        })();
-    
         // Mobile Menu Toggle
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const sidebar = document.querySelector('.sidebar');
