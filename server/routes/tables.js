@@ -15,6 +15,27 @@ router.get('/', (req, res) => {
     res.json(result);
 });
 
+// GET validate table token for Customer App
+router.get('/:number/validate', (req, res) => {
+    const { number } = req.params;
+    const { token } = req.query;
+
+    if (!number || !token) {
+        return res.status(403).json({ valid: false, error: 'Thiếu mã truy cập' });
+    }
+
+    const table = get('SELECT * FROM tables_info WHERE number = ?', [number]);
+    if (!table) {
+        return res.status(404).json({ valid: false, error: 'Bàn không tồn tại' });
+    }
+
+    if (table.qr_token !== token) {
+        return res.status(403).json({ valid: false, error: 'Mã QR không hợp lệ hoặc đã hết hạn' });
+    }
+
+    res.json({ valid: true, table: number });
+});
+
 // POST create new table
 router.post('/', (req, res) => {
     let { number } = req.body;

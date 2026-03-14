@@ -4,14 +4,31 @@ let allCategories = [];
 let activeCategory = 'all';
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Set table number
     const tableNum = getTableNumber();
+    const token = getMenuToken();
+
+    // Khởi tạo trạng thái Loading
+    const container = document.getElementById('productsContainer');
+    
+    try {
+        // Validate Token từ API backend
+        const auth = await api.get(`/api/tables/${tableNum}/validate?token=${token || ''}`);
+        if (!auth.valid) throw new Error('Invalid Token');
+    } catch (error) {
+        // Render màn hình chặn truy cập nếu Token lỗi hoặc không có
+        document.body.innerHTML = `
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; padding:24px; background:var(--bg); color:var(--text); font-family:var(--font-body);">
+                <div style="font-size:4.5rem; margin-bottom:20px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));">📱</div>
+                <h2 style="font-family:var(--font-primary); margin-bottom:12px; font-size:1.5rem; color:var(--danger)">Vui lòng quét mã QR</h2>
+                <p style="color:var(--text-secondary); margin-bottom:24px; line-height:1.5; font-size:0.95rem;">Bạn cần dùng điện thoại quét trực tiếp mã QR <strong>tại bàn của bạn</strong> để xem Menu và đặt món.</p>
+            </div>
+        `;
+        return; // Dừng mọi hoạt động render phía dưới
+    }
+
+    // Nếu qua được ải trên, tải menu bình thường
     document.getElementById('tableNumber').textContent = tableNum;
-
-    // Load data
     await loadMenu();
-
-    // Update cart UI
     cart.updateUI();
 });
 
