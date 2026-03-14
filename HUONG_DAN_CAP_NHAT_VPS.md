@@ -10,7 +10,7 @@ Mở ứng dụng kết nối SSH (như **PuTTY**, **MobaXterm**, **Termius**, h
 
 Gõ lệnh đăng nhập (thay IP bằng địa chỉ IP VPS của bạn):
 ```bash
-ssh root@DIA_CHI_IP_VPS
+ssh root@157.10.52.254
 ```
 *(Nó sẽ hỏi mật khẩu, bạn gõ mật khẩu VPS vào - lưu ý khi gõ sẽ không hiện dấu sao hay ký tự gì đâu, cứ gõ đúng rồi Enter).*
 
@@ -19,11 +19,23 @@ ssh root@DIA_CHI_IP_VPS
 ## Bước 2: Di chuyển vào thư mục chứa code WebQR
 
 Bạn cần biết code trang web đang được lưu ở thư mục nào trên VPS (thường là `/var/www/webqr` hoặc `~/webqr`).
-Giả sử thư mục là `/var/www/webqr`, bạn gõ:
+
+Nếu bạn **KHÔNG BIẾT** địa chỉ thư mục của mình ở đâu, hãy gõ 2 lệnh sau để tìm:
+```bash
+pm2 list
+```
+*(Lệnh này sẽ hiện ra danh sách các app đang chạy. Bạn nhìn xem app nào có tên giống web của mình, ví dụ tên là `webqr-app`. Lấy tên đó lắp vào lệnh dưới)*
 
 ```bash
-cd /var/www/webqr
+pm2 show webqr-app | grep "pm2 env cwd"
 ```
+*(Kết quả hiện ra chính là Đường dẫn thư mục bạn cần tìm. Ví dụ: `/root/WebQR`)*
+
+Sau khi biết thư mục, bạn gõ lệnh `cd` để đi vào đó:
+```bash
+cd /duong/dan/ban/vua/tim/thay
+```
+*(Ví dụ: `cd /root/WebQR`)*
 
 ---
 

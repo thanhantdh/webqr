@@ -26,8 +26,10 @@
         </div>
     </nav>
 
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="main-content">
         <div class="top-bar">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
             <h2>📱 Tạo & In QR Code cho bàn</h2>
             <div class="top-bar-actions">
                 <input class="form-input" id="baseUrl" placeholder="URL gốc" style="width:300px" value="">
@@ -58,7 +60,7 @@
 
             try {
                 // Load tables from database (each table has its own qr_token)
-                const tables = await api.get('/api/tables');
+                const tables = await api.get('/tables');
 
                 if (tables.length === 0) {
                     grid.innerHTML = '<p style="text-align:center;padding:40px;color:var(--text-light);grid-column:1/-1">Chưa có bàn nào. Hãy thêm bàn ở trang <a href="/admin/tables.html">Quản lý Bàn</a></p>';
@@ -99,6 +101,23 @@
         function logout() {
             localStorage.removeItem('admin_token');
             window.location.href = '/admin/login.html';
+        }
+
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        if (mobileMenuBtn && sidebar && overlay) {
+            mobileMenuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('show');
+            });
+
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('show');
+            });
         }
     </script>
 </body>

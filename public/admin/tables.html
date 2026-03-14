@@ -80,8 +80,11 @@
         </div>
     </nav>
 
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <div class="main-content">
         <div class="top-bar">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
             <h2>🪑 Quản lý Bàn</h2>
             <div class="top-bar-actions">
                 <span id="tableStats" style="color:var(--text-secondary);font-size:0.9rem"></span>
@@ -99,7 +102,24 @@
     </div>
 
     <script src="/js/shared/api.js"></script>
-    <script src="/js/admin/table-manager.js"></script>
+    <script src="/js/admin/table-manager.js">
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        if (mobileMenuBtn && sidebar && overlay) {
+            mobileMenuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('show');
+            });
+
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('show');
+            });
+        }
+    </script>
 </body>
 
 </html>
