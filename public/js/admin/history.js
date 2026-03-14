@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Load danh sách các bàn vào Select filter
 async function loadTables() {
     try {
-        const tables = await api.get('/tables');
+        const tables = await api.get('/api/tables');
         const filterTable = document.getElementById('filterTable');
         
         tables.forEach(table => {
@@ -50,7 +50,7 @@ async function loadHistory() {
     const queryStr = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
 
     try {
-        const data = await api.get(`/orders${queryStr}`);
+        const data = await api.get(`/api/orders${queryStr}`);
         allOrders = data;
         
         // Lọc thêm theo số bàn và status 'completed' hay 'paid' ở frontend cho chính xác
