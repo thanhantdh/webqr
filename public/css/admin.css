@@ -1384,6 +1384,18 @@ body {
         box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
     }
 
+    /* Bảng dữ liệu có thể lướt ngang được trên điện thoại */
+    .table-container,
+    .history-table-container,
+    .recent-orders {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 0;
+        box-shadow: none;
+        border: 1px solid var(--border);
+    }
+
     .main-content {
         margin-left: 0;
         width: 100%;
